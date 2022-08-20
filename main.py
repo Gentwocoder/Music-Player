@@ -1,6 +1,8 @@
 from tkinter import *
 import pygame
 from tkinter import filedialog
+import time
+from mutagen.mp3 import MP3
 
 window = Tk()
 window.title("Music Player")
@@ -9,6 +11,34 @@ window.geometry("500x400")
 
 # Pygame mixer
 pygame.mixer.init()
+
+
+# Grab Song Length Time Info
+def play_time():
+    # Grab current song elapsed time
+    current_time = pygame.mixer.music.get_pos() / 1000
+
+    # convert to time format
+    converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
+
+    # Get Currently Playing Song
+    # next_one = music_box.curselection()
+    # Grab song title from playlist
+    song = music_box.get(ACTIVE)
+    # Add directory structure and mp3 to song title
+    song = f"/home/gentle/Music/{song}.mp3"
+    # Get Song Length with Mutagen
+    song_mut = MP3(song)
+    # Get song length
+    song_length = song_mut.info.length
+    # Covert to time format
+    converted_song_length = time.strftime("%M:%S", time.gmtime(song_length))
+
+    # Output time to status bar
+    status_bar.config(text=f"Time Elapsed: {converted_current_time}  of  {converted_song_length} ")
+
+    # Update time
+    status_bar.after(1000, play_time)
 
 
 # Add Song Function
@@ -43,6 +73,9 @@ def play():
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
 
+    # Call the play time function to get song length
+    play_time()
+
 
 # Global Pause Variable
 # global paused
@@ -68,6 +101,9 @@ def pause(is_paused):
 def stop():
     pygame.mixer.music.stop()
     music_box.selection_clear(ACTIVE)
+
+    # Clear the status bar
+    status_bar.config(text="")
 
 
 # Play next song in the playlist
@@ -112,6 +148,22 @@ def previous_song():
     music_box.selection_set(prev_one, last=None)
 
 
+# Delete A Song From Playlist
+def delete_song():
+    # Delete currently selected songs
+    music_box.delete(ANCHOR)
+    # Stop Music if it's Playing
+    pygame.mixer.music.stop()
+
+
+# Delete All Songs From Playlist
+def delete_all_songs():
+    # Delete all songs
+    music_box.delete(0, END)
+    # Stop Music if it's Playing
+    pygame.mixer.music.stop()
+
+
 # Playlist box
 music_box = Listbox(bg="black", fg="green", width=65)
 music_box.pack(pady=15)
@@ -154,8 +206,11 @@ add_song_menu.add_command(label="Add Many Song to Playlist", command=add_many_so
 # Create Delete Song Menu
 remove_song_menu = Menu(my_menu)
 my_menu.add_cascade(label="Remove Songs", menu=remove_song_menu)
-remove_song_menu.add_command(label="Delete Song from Playlist", command=delete_song)
-remove_song_menu.add_command(label="Delete All Songs from Playlist", command=delete_all_songs)
+remove_song_menu.add_command(label="Remove Song from Playlist", command=delete_song)
+remove_song_menu.add_command(label="Remove All Songs from Playlist", command=delete_all_songs)
 
+# Create Status Bar
+status_bar = Label(text="", bd=1, relief=GROOVE, anchor=E)
+status_bar.pack(fill=X, side=BOTTOM, ipady=2)
 
 window.mainloop()
