@@ -70,6 +70,48 @@ def stop():
     music_box.selection_clear(ACTIVE)
 
 
+# Play next song in the playlist
+def next_song():
+    # Get current song tuple number
+    next_one = music_box.curselection()
+    # Add one to the current song number
+    next_one = next_one[0]+1
+    # Grab song title from playlist
+    song = music_box.get(next_one)
+    # Add directory structure and mp3 to song title
+    song = f"/home/gentle/Music/{song}.mp3"
+    # Load and play song
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    # Clear active bar in playlist listbox
+    music_box.selection_clear(0, END)
+    # Activate new song bar
+    music_box.activate(next_one)
+    # Set Active Bar to next song
+    music_box.selection_set(next_one, last=None)
+
+
+# Play Previous song in playlist
+def previous_song():
+    # Get current song tuple number
+    prev_one = music_box.curselection()
+    # Add one to the current song number
+    prev_one = prev_one[0] - 1
+    # Grab song title from playlist
+    song = music_box.get(prev_one)
+    # Add directory structure and mp3 to song title
+    song = f"/home/gentle/Music/{song}.mp3"
+    # Load and play song
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    # Clear active bar in playlist listbox
+    music_box.selection_clear(0, END)
+    # Activate new song bar
+    music_box.activate(prev_one)
+    # Set Active Bar to next song
+    music_box.selection_set(prev_one, last=None)
+
+
 # Playlist box
 music_box = Listbox(bg="black", fg="green", width=65)
 music_box.pack(pady=15)
@@ -86,8 +128,8 @@ control_frame = Frame()
 control_frame.pack(pady=10)
 
 # Player control buttons
-back_button = Button(control_frame, image=back_btn_img, borderwidth=0, padx=9)
-forward_button = Button(control_frame, image=forward_btn_img, borderwidth=0, padx=9)
+back_button = Button(control_frame, image=back_btn_img, borderwidth=0, padx=9, command=previous_song)
+forward_button = Button(control_frame, image=forward_btn_img, borderwidth=0, padx=9, command=next_song)
 play_button = Button(control_frame, image=play_btn_img, borderwidth=0, padx=9, command=play)
 pause_button = Button(control_frame, image=pause_btn_img, borderwidth=0, padx=9, command=lambda: pause(paused))
 stop_button = Button(control_frame, image=stop_btn_img, borderwidth=0, padx=9, command=stop)
@@ -108,5 +150,12 @@ my_menu.add_cascade(label="Add Songs", menu=add_song_menu)
 add_song_menu.add_command(label="Add One Song to Playlist", command=add_song)
 # Add many songs
 add_song_menu.add_command(label="Add Many Song to Playlist", command=add_many_songs)
+
+# Create Delete Song Menu
+remove_song_menu = Menu(my_menu)
+my_menu.add_cascade(label="Remove Songs", menu=remove_song_menu)
+remove_song_menu.add_command(label="Delete Song from Playlist", command=delete_song)
+remove_song_menu.add_command(label="Delete All Songs from Playlist", command=delete_all_songs)
+
 
 window.mainloop()
