@@ -3,6 +3,7 @@ import pygame
 from tkinter import filedialog
 import time
 from mutagen.mp3 import MP3
+import tkinter.ttk as ttk
 
 window = Tk()
 window.title("Music Player")
@@ -18,6 +19,9 @@ def play_time():
     # Grab current song elapsed time
     current_time = pygame.mixer.music.get_pos() / 1000
 
+    # Temp label to get data
+    slider_label.config(text=f"Slider: {int(my_slider.get())} and Song Pos: {int(current_time)}")
+
     # convert to time format
     converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
 
@@ -30,12 +34,20 @@ def play_time():
     # Get Song Length with Mutagen
     song_mut = MP3(song)
     # Get song length
+    global song_length
     song_length = song_mut.info.length
     # Covert to time format
     converted_song_length = time.strftime("%M:%S", time.gmtime(song_length))
 
     # Output time to status bar
     status_bar.config(text=f"Time Elapsed: {converted_current_time}  of  {converted_song_length} ")
+    # Update slider position value to current song position..
+    my_slider.config(value=int(current_time))
+
+    # Update slider to Position
+    slider_position = int(song_length)
+    current_time += 1
+    my_slider.config(to=slider_position, value=int(current_time))
 
     # Update time
     status_bar.after(1000, play_time)
@@ -75,6 +87,10 @@ def play():
 
     # Call the play time function to get song length
     play_time()
+
+    # # Update slider to Position
+    # slider_position = int(song_length)
+    # my_slider.config(to=slider_position, value=0)
 
 
 # Global Pause Variable
@@ -164,6 +180,16 @@ def delete_all_songs():
     pygame.mixer.music.stop()
 
 
+# Create slider function
+def slide(x):
+    # slider_label.config(text=f"{int(my_slider.get())} of {int(song_length)}")
+    song = music_box.get(ACTIVE)
+    song = f"/home/gentle/Music/{song}.mp3"
+
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0, start=int(my_slider.get()))
+
+
 # Playlist box
 music_box = Listbox(bg="black", fg="green", width=65)
 music_box.pack(pady=15)
@@ -215,5 +241,13 @@ remove_song_menu.add_command(label="Remove All Songs from Playlist", command=del
 # Create Status Bar
 status_bar = Label(text="", bd=1, relief=GROOVE, anchor=E)
 status_bar.pack(fill=X, side=BOTTOM, ipady=2)
+
+# Create music position slider
+my_slider = ttk.Scale(from_=0, to=100, orient=HORIZONTAL, value=0, command=slide, length=360)
+my_slider.pack(pady=25)
+
+# Temporary slider label
+slider_label = Label(text="0")
+slider_label.pack(pady=10)
 
 window.mainloop()
