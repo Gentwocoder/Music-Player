@@ -43,7 +43,7 @@ def play_time():
     current_time += 1
 
     if int(my_slider.get()) == int(song_length):
-        status_bar.config(text=f"Time Elapsed: {converted_song_length} ")
+        status_bar.config(text=f"Time Elapsed: {converted_song_length}  of  {converted_song_length} ")
 
     elif int(my_slider.get()) == int(current_time):
         # Slider hasn't been moved
