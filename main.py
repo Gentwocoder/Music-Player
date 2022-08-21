@@ -6,7 +6,7 @@ from mutagen.mp3 import MP3
 
 window = Tk()
 window.title("Music Player")
-# window.iconbitmap('/home/gentle/Music_Player/music_note.ico')
+window.tk.call("wm", "iconphoto", window._w, PhotoImage(file="Images/music_note.ico"))
 window.geometry("500x400")
 
 # Pygame mixer
@@ -167,6 +167,9 @@ def delete_all_songs():
 # Playlist box
 music_box = Listbox(bg="black", fg="green", width=65)
 music_box.pack(pady=15)
+scroll = Scrollbar(orient=VERTICAL, command=music_box.yview)
+music_box.configure(yscrollcommand=scroll.set)
+scroll.place(x=482, y=19, height=152)
 
 # Player Controls images
 back_btn_img = PhotoImage(file="Images/skip_previous.png")
