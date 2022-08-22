@@ -6,9 +6,9 @@ from mutagen.mp3 import MP3
 import tkinter.ttk as ttk
 
 window = Tk()
-window.title("Music Player")
+window.title("X Music")
 window.tk.call("wm", "iconphoto", window._w, PhotoImage(file="Images/music_note.ico"))
-window.geometry("500x400")
+window.geometry("550x400")
 
 # Pygame mixer
 pygame.mixer.init()
@@ -16,11 +16,14 @@ pygame.mixer.init()
 
 # Grab Song Length Time Info
 def play_time():
+    # Check for double timing
+    if stopped:
+        return
     # Grab current song elapsed time
     current_time = pygame.mixer.music.get_pos() / 1000
 
     # Temp label to get data
-    slider_label.config(text=f"Slider: {int(my_slider.get())} and Song Pos: {int(current_time)}")
+    # slider_label.config(text=f"Slider: {int(my_slider.get())} and Song Pos: {int(current_time)}")
 
     # convert to time format
     converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
@@ -44,6 +47,8 @@ def play_time():
 
     if int(my_slider.get()) == int(song_length):
         status_bar.config(text=f"Time Elapsed: {converted_song_length}  of  {converted_song_length} ")
+    elif paused:
+        pass
 
     elif int(my_slider.get()) == int(current_time):
         # Slider hasn't been moved
@@ -98,6 +103,13 @@ def add_many_songs():
 
 # Play Selected Song
 def play():
+    global stopped
+    stopped = False
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
+    global paused
+    paused = False
     song = music_box.get(ACTIVE)
     song = f"/home/gentle/Music/{song}.mp3"
 
@@ -110,6 +122,9 @@ def play():
     # # Update slider to Position
     # slider_position = int(song_length)
     # my_slider.config(to=slider_position, value=0)
+    # Get current volume
+    # current_volume = pygame.mixer.music.get_volume()
+    # slider_label.config(text=int(current_volume) * 100)
 
 
 # Global Pause Variable
@@ -132,17 +147,32 @@ def pause(is_paused):
         paused = True
 
 
+# global stopped
+stopped = False
+
+
 # Stop Playing Current Song
 def stop():
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
+    # Stop the song
     pygame.mixer.music.stop()
     music_box.selection_clear(ACTIVE)
 
     # Clear the status bar
     status_bar.config(text="")
 
+    # set stop variable
+    global stopped
+    stopped = True
+
 
 # Play next song in the playlist
 def next_song():
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
     # Get current song tuple number
     next_one = music_box.curselection()
     # Add one to the current song number
@@ -164,6 +194,9 @@ def next_song():
 
 # Play Previous song in playlist
 def previous_song():
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
     # Get current song tuple number
     prev_one = music_box.curselection()
     # Add one to the current song number
@@ -185,6 +218,7 @@ def previous_song():
 
 # Delete A Song From Playlist
 def delete_song():
+    stop()
     # Delete currently selected songs
     music_box.delete(ANCHOR)
     # Stop Music if it's Playing
@@ -193,6 +227,7 @@ def delete_song():
 
 # Delete All Songs From Playlist
 def delete_all_songs():
+    stop()
     # Delete all songs
     music_box.delete(0, END)
     # Stop Music if it's Playing
@@ -209,12 +244,31 @@ def slide(x):
     pygame.mixer.music.play(loops=0, start=int(my_slider.get()))
 
 
+# Create volume function
+def volume(x):
+    pygame.mixer.music.set_volume(volume_slider.get())
+    # Get current volume
+    current_volume = pygame.mixer.music.get_volume()
+    current_volume *= 100
+    # slider_label.config(text=int(current_volume) * 100)
+
+    # Change volume meter picture
+    if int(current_volume) < 1:
+        volume_meter.config(image=vol2)
+    elif 0 < int(current_volume) <= 50:
+        volume_meter.config(image=vol1)
+    elif 50 < int(current_volume) <= 100:
+        volume_meter.config(image=vol)
+
+
+master_frame = Frame()
+master_frame.pack(pady=20)
 # Playlist box
-music_box = Listbox(bg="black", fg="green", width=65)
-music_box.pack(pady=15)
-scroll = Scrollbar(orient=VERTICAL, command=music_box.yview)
+music_box = Listbox(master_frame, bg="black", fg="green", width=65, height=12)
+music_box.grid(row=0, column=0)
+scroll = Scrollbar(master_frame, orient=VERTICAL, command=music_box.yview)
 music_box.configure(yscrollcommand=scroll.set)
-scroll.place(x=482, y=19, height=152)
+# scroll.place(x=440, y=1, height=150)
 
 # Player Controls images
 back_btn_img = PhotoImage(file="Images/skip_previous.png")
@@ -224,8 +278,12 @@ pause_btn_img = PhotoImage(file="Images/pause.png")
 stop_btn_img = PhotoImage(file="Images/stop.png")
 
 # Player control frame
-control_frame = Frame()
-control_frame.pack(pady=10)
+control_frame = Frame(master_frame)
+control_frame.grid(row=1, column=0, pady=15)
+
+# Create volume frame
+volume_frame = LabelFrame(master_frame, text="Volume")
+volume_frame.grid(row=0, column=2, padx=20)
 
 # Player control buttons
 back_button = Button(control_frame, image=back_btn_img, borderwidth=0, padx=9, command=previous_song)
@@ -239,6 +297,14 @@ forward_button.grid(row=0, column=1)
 play_button.grid(row=0, column=2)
 pause_button.grid(row=0, column=3)
 stop_button.grid(row=0, column=4)
+
+# Create volume pictures
+global vol
+global vol1
+global vol2
+vol = PhotoImage(file="Images/volumeup.png")
+vol1 = PhotoImage(file="Images/volumedown.png")
+vol2 = PhotoImage(file="Images/volumemute.png")
 
 # Create menu
 my_menu = Menu()
@@ -262,11 +328,18 @@ status_bar = Label(text="", bd=1, relief=GROOVE, anchor=E)
 status_bar.pack(fill=X, side=BOTTOM, ipady=2)
 
 # Create music position slider
-my_slider = ttk.Scale(from_=0, to=100, orient=HORIZONTAL, value=0, command=slide, length=360)
-my_slider.pack(pady=25)
+my_slider = ttk.Scale(master_frame, from_=0, to=100, orient=HORIZONTAL, value=0, command=slide, length=360)
+my_slider.grid(row=2, column=0, pady=10)
+
+# Create volume meter
+volume_meter = Label(master_frame, image=vol)
+volume_meter.grid(row=1, column=2, padx=10)
+# Volume Slider
+volume_slider = ttk.Scale(volume_frame, from_=0, to=1, orient=VERTICAL, value=1, command=volume, length=150)
+volume_slider.pack(pady=10)
 
 # Temporary slider label
-slider_label = Label(text="0")
-slider_label.pack(pady=10)
+# slider_label = Label(text="0")
+# slider_label.pack(pady=10)
 
 window.mainloop()
