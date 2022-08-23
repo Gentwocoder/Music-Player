@@ -168,6 +168,18 @@ def stop():
     stopped = True
 
 
+def replay():
+    song = music_box.get(ACTIVE)
+    song = f"/home/gentle/Music/{song}.mp3"
+    # Rewind the song
+    pygame.mixer.music.queue(song, loops=-1)
+    music_box.selection_clear(ACTIVE)
+    if int(my_slider.get()) == int(song_length):
+        # Reset slider and status bar
+        status_bar.config(text="")
+        my_slider.config(value=0)
+
+
 # Play next song in the playlist
 def next_song():
     # Reset slider and status bar
@@ -291,17 +303,16 @@ forward_button = Button(control_frame, image=forward_btn_img, borderwidth=0, pad
 play_button = Button(control_frame, image=play_btn_img, borderwidth=0, padx=9, command=play)
 pause_button = Button(control_frame, image=pause_btn_img, borderwidth=0, padx=9, command=lambda: pause(paused))
 stop_button = Button(control_frame, image=stop_btn_img, borderwidth=0, padx=9, command=stop)
+replay_button = Button(control_frame, text="Repeat", borderwidth=0, padx=9, command=replay)
 
 back_button.grid(row=0, column=0)
 forward_button.grid(row=0, column=1)
 play_button.grid(row=0, column=2)
 pause_button.grid(row=0, column=3)
 stop_button.grid(row=0, column=4)
+replay_button.grid(row=0, column=5)
 
 # Create volume pictures
-global vol
-global vol1
-global vol2
 vol = PhotoImage(file="Images/volumeup.png")
 vol1 = PhotoImage(file="Images/volumedown.png")
 vol2 = PhotoImage(file="Images/volumemute.png")
