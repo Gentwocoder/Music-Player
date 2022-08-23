@@ -335,7 +335,7 @@ my_slider.grid(row=2, column=0, pady=10)
 volume_meter = Label(master_frame, image=vol)
 volume_meter.grid(row=1, column=2, padx=10)
 # Volume Slider
-volume_slider = ttk.Scale(volume_frame, from_=0, to=1, orient=VERTICAL, value=1, command=volume, length=150)
+volume_slider = ttk.Scale(volume_frame, from_=1, to=0, orient=VERTICAL, value=1, command=volume, length=150)
 volume_slider.pack(pady=10)
 
 # Temporary slider label
