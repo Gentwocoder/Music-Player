@@ -171,7 +171,7 @@ def stop():
 def replay():
     song = music_box.get(ACTIVE)
     song = f"/home/gentle/Music/{song}.mp3"
-    # Rewind the song
+    # Replay the song
     pygame.mixer.music.queue(song, loops=-1)
     music_box.selection_clear(ACTIVE)
     if int(my_slider.get()) == int(song_length):
